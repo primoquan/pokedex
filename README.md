@@ -35,7 +35,7 @@ Prueba todas las funcionalidades directamente en tu navegador.
 - 🌙 **Temas día/noche** intercambiables
 - ⚡ **Carga progresiva** por generaciones
 - 🔄 **Filtros avanzados** por generación
-- 📊 **Información completa** (stats, evoluciones, ubicaciones)
+- 📊 **Información completa** (tipos con iconos SVG, stats, altura, peso, evoluciones, ubicaciones)
 - 🎮 **Interfaz estilo Pokémon** con animaciones
 
 ---
@@ -354,10 +354,31 @@ function renderPokemonList(pokemons) {
 }
 ```
 
+##### **Búsqueda Avanzada**
+```javascript
+searchInput.addEventListener('input', () => {
+  const term = searchInput.value.toLowerCase().trim();
+  
+  if (!term) {
+    filteredPokemons = [...allPokemons];
+  } else {
+    // Buscar por nombre o por ID
+    filteredPokemons = allPokemons.filter(p => {
+      const matchesName = p.name.toLowerCase().includes(term);
+      const matchesId = p.id.toString().includes(term);
+      return matchesName || matchesId;
+    });
+  }
+  
+  renderPokemonList(filteredPokemons);
+});
+```
+
 **Explicación:**
 - **DOM manipulation**: Creación dinámica de elementos
 - **Clases BEM**: Aplicación consistente
 - **Event listeners**: Interactividad
+- **Búsqueda dual**: Por nombre ("pikachu") o ID ("25")
 
 ---
 
@@ -508,6 +529,7 @@ detailContainer.innerHTML = `
     <div class="pokemon-detail__info">
       <span class="pokemon-detail__number">#${pokemon.id}</span>
       <h2 class="pokemon-detail__name">${capitalize(pokemon.name)}</h2>
+      <div class="pokemon-detail__type-list">${typesWithIconsHtml}</div>
     </div>
     <button onclick="toggleFavorite(${pokemon.id})" class="pokemon-detail__favorite-btn">
       ${favorites.includes(pokemon.id) ? '💖' : '♡'}
@@ -515,8 +537,8 @@ detailContainer.innerHTML = `
   </div>
   <img src="${pokemon.sprite}" class="pokemon-detail__image">
   <div class="pokemon-detail__stats">
-    <h3>Stats</h3>
-    ${statsHtml}
+    <h3>Estadísticas</h3>
+    ${statsWithPhysicalInfo}
   </div>
   <div class="pokemon-detail__evolution">
     <h3>Evolución</h3>
@@ -562,6 +584,46 @@ async function buildEvolutionHtml(evoChain) {
 2. **Performance**: Solo carga lo necesario
 3. **Mantenibilidad**: Un template para múltiples datos
 4. **Interactividad**: Responde a acciones del usuario
+
+#### 4. **Información Detallada con Iconos**
+
+**Tipos con Iconos SVG Modernos:**
+```javascript
+const getTypeIconUrl = (type) => {
+  // Mapeo de tipos a iconos SVG modernos
+  const typeIcons = {
+    'fire': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/fire.svg',
+    'water': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/water.svg',
+    'grass': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/grass.svg',
+    // ... todos los 18 tipos
+  };
+  return typeIcons[type] || '';
+};
+
+const typesHtml = pokemon.types.map(type => 
+  `<span class="pokemon-detail__type pokemon-detail__type--${type}">
+     <img src="${getTypeIconUrl(type)}" 
+          alt="${type}" class="pokemon-detail__type-icon">
+     ${capitalize(type)}
+   </span>`
+).join('');
+```
+
+**Estadísticas Completas:**
+```javascript
+const physicalStats = `
+  <div class="pokemon-detail__stat">Altura: ${heightInMeters} m</div>
+  <div class="pokemon-detail__stat">Peso: ${weightInKg} kg</div>
+`;
+const allStatsHtml = physicalStats + statsHtml;
+```
+
+**Características:**
+- **Iconos SVG modernos**: Vectoriales de alta calidad que escalan perfectamente
+- **18 tipos completos**: Todos los tipos Pokémon con iconos oficiales
+- **Información física**: Altura y peso integrados en estadísticas
+- **Conversión de unidades**: Decímetros a metros, hectogramos a kilogramos
+- **Layout optimizado**: Tipos debajo del nombre del Pokémon
 
 ---
 
@@ -889,7 +951,7 @@ window.addEventListener('resize', () => {
   - Generaciones Clásicas (1-4)
   - Generaciones Modernas (5-9)
   - Generaciones individuales
-- **Búsqueda**: Input de texto para buscar por nombre
+- **Búsqueda**: Input de texto para buscar por nombre o ID
 - **Reset**: Botón para limpiar filtros
 
 #### 3. **Sistema de Favoritos**
