@@ -82,6 +82,8 @@ async function fetchPokemon(idOrName) {
       name: data.name,
       sprite: data.sprites.front_default,
       types: data.types.map(t => t.type.name),
+      height: data.height, // en decímetros (API)
+      weight: data.weight, // en hectogramos (API)
       stats: data.stats.map(s => ({ name: s.stat.name, value: s.base_stat })),
       speciesUrl: data.species.url
     };
@@ -93,6 +95,8 @@ async function fetchPokemon(idOrName) {
       name: `pokemon-${idOrName}`,
       sprite: 'https://via.placeholder.com/96x96/cccccc/666666?text=?',
       types: ['unknown'],
+      height: 0,
+      weight: 0,
       stats: [],
       speciesUrl: `${POKE_API}pokemon-species/${idOrName}/`
     };
@@ -198,16 +202,63 @@ async function showPokemonDetail(pokemonOrId) {
       } else evolutionHtml = '<p>No tiene evoluciones</p>';
     } catch (e) { evolutionHtml = '<p>No tiene evoluciones</p>'; }
 
+    // Crear HTML para tipos con iconos modernos
+    const getTypeIconUrl = (type) => {
+      // Mapeo de tipos a iconos desde una fuente confiable
+      const typeIcons = {
+        'normal': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/normal.svg',
+        'fire': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/fire.svg',
+        'water': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/water.svg',
+        'electric': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/electric.svg',
+        'grass': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/grass.svg',
+        'ice': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/ice.svg',
+        'fighting': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/fighting.svg',
+        'poison': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/poison.svg',
+        'ground': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/ground.svg',
+        'flying': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/flying.svg',
+        'psychic': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/psychic.svg',
+        'bug': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/bug.svg',
+        'rock': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/rock.svg',
+        'ghost': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/ghost.svg',
+        'dragon': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/dragon.svg',
+        'dark': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/dark.svg',
+        'steel': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/steel.svg',
+        'fairy': 'https://cdn.jsdelivr.net/gh/duiker101/pokemon-type-svg-icons/icons/fairy.svg'
+      };
+      return typeIcons[type] || '';
+    };
+    
+    const typesHtml = pokemon.types.map(type => 
+      `<span class="pokemon-detail__type pokemon-detail__type--${type}">
+         <img src="${getTypeIconUrl(type)}" 
+              alt="${type}" class="pokemon-detail__type-icon" 
+              onerror="this.style.display='none'">
+         ${capitalize(type)}
+       </span>`
+    ).join('');
+    
+    // Convertir unidades (API devuelve en decímetros y hectogramos)
+    const heightInMeters = (pokemon.height / 10).toFixed(1);
+    const weightInKg = (pokemon.weight / 10).toFixed(1);
+    
     const statsHtml = pokemon.stats.map(s => `<div class="pokemon-detail__stat">${s.name}: ${s.value}</div>`).join('');
 
     // Preservar el botón de cerrar si existe
     const closeBtn = detailContainer.querySelector('.pokemon-detail__close');
+    
+    // Agregar altura y peso a las estadísticas
+    const physicalStats = `
+      <div class="pokemon-detail__stat">Altura: ${heightInMeters} m</div>
+      <div class="pokemon-detail__stat">Peso: ${weightInKg} kg</div>
+    `;
+    const allStatsHtml = physicalStats + statsHtml;
     
     detailContainer.innerHTML = `
       <div class="pokemon-detail__header">
         <div class="pokemon-detail__info">
           <span class="pokemon-detail__number">#${pokemon.id}</span>
           <h2 class="pokemon-detail__name">${capitalize(pokemon.name)}</h2>
+          <div class="pokemon-detail__type-list">${typesHtml}</div>
         </div>
         <button onclick="toggleFavorite(${pokemon.id})" class="pokemon-detail__favorite-btn">
           ${favorites.includes(pokemon.id) ? 
@@ -216,7 +267,7 @@ async function showPokemonDetail(pokemonOrId) {
         </button>
       </div>
       <img src="${pokemon.sprite}" class="pokemon-detail__image">
-      <div class="pokemon-detail__stats"><h3>Stats</h3>${statsHtml}</div>
+      <div class="pokemon-detail__stats"><h3>Estadísticas</h3>${allStatsHtml}</div>
       <div class="pokemon-detail__evolution"><h3>Evolución</h3>${evolutionHtml}</div>
       <div class="pokemon-detail__locations"><h3>Ubicaciones</h3>${await getLocations(pokemon.id)}</div>
     `;
@@ -298,9 +349,20 @@ generationSelect.addEventListener('change', () => {
 
 // --- Buscar Pokémon ---
 searchInput.addEventListener('input', () => {
-  const term = searchInput.value.toLowerCase();
-  // Buscar siempre en todos los Pokémon, no en los filtrados
-  filteredPokemons = allPokemons.filter(p => p.name.includes(term));
+  const term = searchInput.value.toLowerCase().trim();
+  
+  if (!term) {
+    // Si no hay término de búsqueda, mostrar todos los Pokémon
+    filteredPokemons = [...allPokemons];
+  } else {
+    // Buscar por nombre o por ID
+    filteredPokemons = allPokemons.filter(p => {
+      const matchesName = p.name.toLowerCase().includes(term);
+      const matchesId = p.id.toString().includes(term);
+      return matchesName || matchesId;
+    });
+  }
+  
   renderPokemonList(filteredPokemons);
 });
 
