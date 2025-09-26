@@ -2,20 +2,27 @@
 
 Una aplicación web moderna que consume la PokeAPI para mostrar información detallada de Pokémon con interfaz responsive y funcionalidades avanzadas.
 
+## 🔗 Demo en Vivo
+
+**👉 [Ver la aplicación funcionando](https://primoquan.github.io/pokedex/)**
+
+Prueba todas las funcionalidades directamente en tu navegador.
+
 ## 📋 Tabla de Contenidos
 
-1. [Características](#-características)
-2. [Tecnologías](#️-tecnologías)
-3. [Estructura del Proyecto](#-estructura-del-proyecto)
-4. [HTML - Estructura Semántica](#-html---estructura-semántica)
-5. [CSS - Metodología BEM](#-css---metodología-bem)
-6. [JavaScript - Funcionalidad](#-javascript---funcionalidad)
-7. [Consumo de API](#-consumo-de-api)
-8. [Renderizado Dinámico](#-renderizado-dinámico)
-9. [Sistema de Favoritos](#-sistema-de-favoritos)
-10. [Sistema de Carga Progresiva](#-sistema-de-carga-progresiva)
-11. [Responsividad](#-responsividad)
-12. [Cómo Usar](#-cómo-usar)
+1. [Demo en Vivo](#-demo-en-vivo)
+2. [Características](#-características)
+3. [Tecnologías](#️-tecnologías)
+4. [Estructura del Proyecto](#-estructura-del-proyecto)
+5. [HTML - Estructura Semántica](#-html---estructura-semántica)
+6. [CSS - Metodología BEM](#-css---metodología-bem)
+7. [JavaScript - Funcionalidad](#-javascript---funcionalidad)
+8. [Consumo de API](#-consumo-de-api)
+9. [Renderizado Dinámico](#-renderizado-dinámico)
+10. [Sistema de Favoritos](#-sistema-de-favoritos)
+11. [Sistema de Carga Progresiva](#-sistema-de-carga-progresiva)
+12. [Responsividad](#-responsividad)
+13. [Cómo Usar](#-cómo-usar)
 
 ---
 
@@ -857,6 +864,10 @@ window.addEventListener('resize', () => {
 
 ### Instalación
 
+#### **Opción 1: Ver Demo Online (Recomendado)**
+👉 **[Abrir la aplicación](https://primoquan.github.io/pokedex/)** - Sin instalación necesaria
+
+#### **Opción 2: Instalación Local**
 1. **Clonar o descargar** el proyecto
 2. **Abrir** `index.html` en un navegador
 3. **Servir localmente** (recomendado):
@@ -954,4 +965,14 @@ La aplicación es completamente funcional, responsive y sigue las mejores práct
 
 ---
 
+## 🌐 Enlaces Importantes
+
+- **🚀 Demo en Vivo**: [https://primoquan.github.io/pokedex/](https://primoquan.github.io/pokedex/)
+- **📁 Repositorio**: Código fuente del proyecto
+- **📖 Documentación**: Este README completo
+
+---
+
 **🎮 ¡Disfruta explorando el mundo Pokémon!**
+
+*Prueba la aplicación online o descarga el código para explorar la implementación.*
